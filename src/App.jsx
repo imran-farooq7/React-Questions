@@ -3,9 +3,14 @@ import { Header } from "./components/Header";
 import Loader from "./components/Loader";
 import Main from "./components/Main";
 import Start from "./components/Start";
+import Progress from "./components/Progress";
+import Question from "./components/Question";
 const intialState = {
 	status: "loading",
 	questions: [],
+	currentQuestion: 0,
+	points: 0,
+	answer: null,
 };
 const reducer = (state, action) => {
 	if (action.type === "dataRecevied") {
@@ -24,11 +29,26 @@ const reducer = (state, action) => {
 			...state,
 			status: "start",
 		};
+	} else if (action.type === "newAns") {
+		const question = state.questions.at(state.currentQuestion);
+		return {
+			...state,
+			answer: action.payload,
+			points:
+				action.payload === question.correctOption
+					? state.points + question.points
+					: state.points,
+		};
 	}
 };
 
 function App() {
-	const [{ status, questions }, dispatch] = useReducer(reducer, intialState);
+	const [{ status, questions, currentQuestion, points, answer }, dispatch] =
+		useReducer(reducer, intialState);
+	const maxPoints = questions.reduce(
+		(prev, current) => prev + current.points,
+		0
+	);
 	useEffect(() => {
 		const getQuestions = async () => {
 			try {
@@ -52,7 +72,17 @@ function App() {
 				)}
 				{status === "start" && (
 					<>
-						<Progress />
+						<Progress
+							questions={questions}
+							currentQuestion={currentQuestion}
+							points={points}
+							maxPoints={maxPoints}
+						/>
+						<Question
+							question={questions[currentQuestion]}
+							dispatch={dispatch}
+							answer={answer}
+						/>
 					</>
 				)}
 			</Main>
