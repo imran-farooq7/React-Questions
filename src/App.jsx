@@ -5,6 +5,8 @@ import Main from "./components/Main";
 import Start from "./components/Start";
 import Progress from "./components/Progress";
 import Question from "./components/Question";
+import NextButton from "./components/NextButton";
+import Finished from "./components/Finished";
 const intialState = {
 	status: "loading",
 	questions: [],
@@ -38,6 +40,17 @@ const reducer = (state, action) => {
 				action.payload === question.correctOption
 					? state.points + question.points
 					: state.points,
+		};
+	} else if (action.type === "nextQuestion") {
+		return {
+			...state,
+			currentQuestion: state.currentQuestion + 1,
+			answer: (state.answer = null),
+		};
+	} else if (action.type === "finish") {
+		return {
+			...state,
+			status: "finish",
 		};
 	}
 };
@@ -83,7 +96,16 @@ function App() {
 							dispatch={dispatch}
 							answer={answer}
 						/>
+						<NextButton
+							dispatch={dispatch}
+							answer={answer}
+							currentQuestion={currentQuestion}
+							questions={questions}
+						/>
 					</>
+				)}
+				{status === "finish" && (
+					<Finished points={points} maxPoints={maxPoints} />
 				)}
 			</Main>
 		</div>
